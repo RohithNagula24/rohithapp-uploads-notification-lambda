@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: RohithApp Uploads Notification Lambda (SAM managed)
+
+# -------------------------------------------------------------------
+# Global defaults (applies to all Lambda functions in this template)
+# -------------------------------------------------------------------
+Globals:
+  Function:
+    Runtime: java21
+    Timeout: 30
+    MemorySize: 512
+    Tracing: Active
+    LoggingConfig:
+      LogFormat: JSON
+
+# -------------------------------------------------------------------
+# Resources
+# -------------------------------------------------------------------
+Resources:
+
+  UploadsNotificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: RohithApps-UploadsNotificationFunction
+
+      # Entry point
+      Handler: com.rohith.lambda.UploadsNotificationHandler::handleRequest
+
+      # JAR produced by mvn clean package
+      CodeUri: target/uploads-notification-lambda-1.0.0.jar
+
+      AutoPublishAlias: live
+
+      # -----------------------------
+      # Environment variables
+      # -----------------------------
+      Environment:
+        Variables:
+          SNS_TOPIC_ARN: arn:aws:sns:us-east-2:503561412252:RohithApp-UploadsNotificationTopic
+
+      # -----------------------------
+      # IAM permissions
+      # -----------------------------
+      Policies:
+        # CloudWatch Logs
+        - AWSLambdaBasicExecutionRole
+
+        # Read from SQS
+        - SQSPollerPolicy:
+            QueueName: RohithApp-UploadsNotificationQueue
+
+        # Publish to SNS
+        - SNSPublishMessagePolicy:
+            TopicName: RohithApp-UploadsNotificationTopic
+
+      # -----------------------------
+      # Event sources (Triggers)
+      # -----------------------------
+      Events:
+        SQSTrigger:
+          Type: SQS
+          Properties:
+            Queue: arn:aws:sqs:us-east-2:503561412252:RohithApp-UploadsNotificationQueue
+            BatchSize: 10
+            Enabled: true
+
+      # -----------------------------
+      # Safe deployment strategy
+      # -----------------------------
+      DeploymentPreference:
+        Type: AllAtOnce
