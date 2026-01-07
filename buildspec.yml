@@ -1,0 +1,26 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto21
+    commands:
+      - echo Installing SAM CLI
+      - pip install aws-sam-cli
+
+  pre_build:
+    commands:
+      - echo Building Lambda artifact
+      - mvn clean package
+
+  build:
+    commands:
+      - echo Packaging SAM application
+      - sam package \
+        --template-file template.yaml \
+        --s3-bucket rohithapp-sam-artifacts-bucket \
+        --output-template-file packaged-template.yaml
+
+artifacts:
+  files:
+    - packaged-template.yaml
