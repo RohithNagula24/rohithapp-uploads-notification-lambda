@@ -16,12 +16,14 @@ public class UploadsNotificationHandler
     @Override
     public Void handleRequest(SQSEvent event, Context context) {
 
+
         event.getRecords().forEach(record -> {
             snsClient.publish(PublishRequest.builder()
                     .topicArn(TOPIC_ARN)
                     .message(record.getBody())
                     .build());
         });
+        context.getLogger().log("Deployed via CI/CD pipeline");
 
         return null;
     }
