@@ -16,10 +16,8 @@ phases:
   build:
     commands:
       - echo Packaging SAM application
-      - sam package \
-        --template-file template.yaml \
-        --s3-bucket rohithapp-sam-artifacts-bucket \
-        --output-template-file packaged-template.yaml
+      - sam package --template-file template.yaml --s3-bucket rohithapp-sam-artifacts-bucket --output-template-file packaged-template.yaml
+
 
 artifacts:
   files:
